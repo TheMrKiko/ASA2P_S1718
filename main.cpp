@@ -12,41 +12,33 @@
 using namespace std;
 
 /********************************* ESTRUTURAS *********************************/
-
+typedef struct vertice {
+	
+}
 /********************************* PROTOTIPOS *********************************/
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
-    int altura, largura, i=0, j=0, arrayIndex = 0;
+    int linhas, colunas, i=0, j=0, arrayIndex = 0;
     int* plano;
-    char c;
     // LER INPUT
     // tamanhos iniciais das tabelas
-    if (!scanf("%d %d", &altura, &largura) || altura <= 0 || largura <= 0 ) {
+    if (!scanf("%d %d", &linhas, &colunas) || linhas <= 0 || colunas <= 0 ) {
 		printf("Deu erro a ler\n");
 	}
 
     // pesos do primeiro plano
     //TODO
     //getchar();
-    plano = new int[altura*largura];
-    while(i<altura) {
-        getchar();
-        //printf("NOVA LINHA %d\n", i);
-        j = 0;
-        while (j<largura) {
-            //printf("NOVA COLUNA %d\n", j);
-            c = getchar();
-            if('0'<= c && c<='9') {
-                // printf("char %c\n", c);
-                plano[arrayIndex++] = atoi(&c);
-                j++;
-            }
+    plano = new int[linhas*colunas];
+	for (i = 0; i<linhas; i++) {
+		for (j = 0; j<colunas; j++) {
+			scanf("%d", &plano[arrayIndex++]);
         }
-        i++;
-    }
+	}
+
     printf("plano:\n");
-    for(i=0;i<altura*largura;i++) {
+    for(i=0;i<linhas*colunas;i++) {
         printf("%d", plano[i]);
     }
     printf("\n------\n");
@@ -55,6 +47,7 @@ int main(int argc, char const* argv[]) {
     // pesos do cenario
     //TODO
     //getchar();
+	//cenario = new int[linhas*colunas];
 
     // pesos das vizinhancas horizontais
     // TODO
