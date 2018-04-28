@@ -9,6 +9,7 @@
 /*******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stack>
 using namespace std;
 
 #define min(A, B) A < B ? A : B
@@ -24,15 +25,15 @@ typedef struct vertice {
 	int west[2];
 	int fsource[2];
 	int target[2];
-} Vertice;
+} * Vertice;
 
 /********************************* PROTOTIPOS *********************************/
-void printVertices(Vertice* verts, int);
+void printVertices(Vertice verts, int);
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
     int numLin, numCol, numV, aux, l, c, v, min;
-	Vertice* verts;
+	Vertice verts;
 
     // LER INPUT ---------------------------------------------------------------
     // tamanhos iniciais das tabelas -------------
@@ -104,7 +105,7 @@ int main(int argc, char const* argv[]) {
 }
 
 /******************************* OUTRAS FUNCOES *******************************/
-void printVertices(Vertice* verts, int numV) {
+void printVertices(Vertice verts, int numV) {
 	int v;
 	for (v = 0; v < numV; v++) {
 		printf("V: %d - %d/%d | n%d/%d s%d/%d e%d/%d o%d/%d | %d/%d\n", v,
@@ -116,3 +117,71 @@ void printVertices(Vertice* verts, int numV) {
 		verts[v].target[FLOW], verts[v].target[CAPACITY]);
 	}
 }
+
+
+void Edmondzinho(Vertice verts, int numV, int numCol) {
+	int i, flow = 0, targ = numV, pi[numV], foundPath = 1, df;
+
+	for (i=0; i<numV; i++) {
+		pi[i] = -1;
+	}
+	do {
+		foundPath = bfs(verts, pi);
+	} while (foundPath) {
+
+		df = verts[pi[targ]].target[CAPACITY] - verts[pi[targ]].target[FLOW];
+		for (v = pi[targ]; v != -1; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
+			df = min(df, getDiffFromTo(p[v], v,  numCol));
+		}
+
+	}
+
+}
+
+int getDiffFromTo(int from, int to, int numCol, Vertice verts) {
+	switch (relatedPos(from, to, numCol)) {
+		case 'd':
+			return verts[from].east[CAPACITY] - verts[to].east[FLOW];
+			break;
+		case 'e':
+			return verts[from].west[CAPACITY] - verts[to].west[FLOW];
+			break;
+		case 's':
+			return verts[from].south[CAPACITY] - verts[to].south[FLOW];
+			break;
+		case 'n':
+			return verts[from].north[CAPACITY] - verts[to].north[FLOW];
+			break;
+	}
+}
+
+void setDiffFromTo(int from, int to, int numCol, Vertice verts) {
+	switch (relatedPos(from, to, numCol)) {
+		case 'd':
+			verts[from].east[CAPACITY] - verts[to].east[FLOW];
+			break;
+		case 'e':
+			verts[from].west[CAPACITY] - verts[to].west[FLOW];
+			break;
+		case 's':
+			verts[from].south[CAPACITY] - verts[to].south[FLOW];
+			break;
+		case 'n':
+			verts[from].north[CAPACITY] - verts[to].north[FLOW];
+			break;
+	}
+}
+
+char relatedPos(int from, int to, int numCol) {
+	if (to - from == 1 ) {
+		return 'd'
+	} else if (to - from == -1) {
+		return 'e';
+	} else if ( (to - from) > 0 && (to - from) % numCol == 0 ) {
+		return 's';
+	} else {
+		return 'n';
+	}
+}
+
+void joaochupaila()
