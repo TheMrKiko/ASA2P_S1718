@@ -11,51 +11,86 @@
 #include <stdlib.h>
 using namespace std;
 
+#define min(A, B) A < B ? A : B
+#define FLOW 0
+#define CAPACITY 1
+#define pos(line, column) line * numCol + column
+
 /********************************* ESTRUTURAS *********************************/
 typedef struct vertice {
-	
-}
+	int north[2];
+	int south[2];
+	int east[2];
+	int west[2];
+	int fsource[2];
+	int target[2];
+} Vertice;
+
 /********************************* PROTOTIPOS *********************************/
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
-    int linhas, colunas, i=0, j=0, arrayIndex = 0;
-    int* plano;
+    int numLin, numCol, numV, aux, l, c, v;
+	Vertice* vertices;
+
     // LER INPUT
-    // tamanhos iniciais das tabelas
-    if (!scanf("%d %d", &linhas, &colunas) || linhas <= 0 || colunas <= 0 ) {
+    // tamanhos iniciais das tabelas -------------
+    if (!scanf("%d %d", &numLin, &numCol) || numLin <= 0 || numCol <= 0 ) {
 		printf("Deu erro a ler\n");
 	}
 
-    // pesos do primeiro plano
-    //TODO
-    //getchar();
-    plano = new int[linhas*colunas];
-	for (i = 0; i<linhas; i++) {
-		for (j = 0; j<colunas; j++) {
-			scanf("%d", &plano[arrayIndex++]);
-        }
+	numV = numLin * numCol;
+	vertices = new vertice[numV + 1];
+
+    // pesos do primeiro plano -------------
+	// getchar();
+
+	for (v = 0; v < numV; v++) {
+		scanf("%d", &vertices[v].fsource[CAPACITY]);
+		vertices[v].fsource[FLOW] = 0;
 	}
 
-    printf("plano:\n");
-    for(i=0;i<linhas*colunas;i++) {
-        printf("%d", plano[i]);
+    /*printf("plano:\n");
+    for (v = 0; v < numV; v++) {
+        printf("%d/%d-", vertices[v].fsource[FLOW], vertices[v].fsource[CAPACITY]);
     }
-    printf("\n------\n");
+    printf("\n------\n");*/
 
+	// pesos do cenario -------------
+	// getchar();
 
-    // pesos do cenario
-    //TODO
-    //getchar();
-	//cenario = new int[linhas*colunas];
+	for (v = 0; v < numV; v++) {
+		scanf("%d", &vertices[v].target[CAPACITY]);
+		vertices[v].target[FLOW] = 0;
+	}
+    /*for (v = 0; v < numV; v++) {
+        printf("%d-%d", vertices[v].target[FLOW], vertices[v].target[CAPACITY]);
+    }
+    printf("\n------\n");*/
 
-    // pesos das vizinhancas horizontais
-    // TODO
-    //getchar();
+    // pesos das vizinhancas horizontais -------------
+    // getchar();
+	for (l = 0; l < numLin; l++) {
+		for (c = 0; c < numCol - 1; c++) {
+			scanf("%d", &aux);
+			vertices[pos(l, c)].east[CAPACITY] = aux;
+			vertices[pos(l, c)].east[FLOW] = 0;
+			vertices[pos(l, c+1)].west[CAPACITY] = aux;
+			vertices[pos(l, c+1)].west[FLOW] = 0;
+		}
+	}
 
     // pesos das vizinhancas verticais
-    // TODO
-
+	// getchar();
+	for (l = 0; l < numLin - 1; l++) {
+		for (c = 0; c < numCol; c++) {
+			scanf("%d", &aux);
+			vertices[pos(l, c)].south[CAPACITY] = aux;
+			vertices[pos(l, c)].south[FLOW] = 0;
+			vertices[pos(l+1, c)].north[CAPACITY] = aux;
+			vertices[pos(l+1, c)].north[FLOW] = 0;
+		}
+	}
 
 	return 0;
 }
