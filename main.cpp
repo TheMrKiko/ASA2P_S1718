@@ -52,6 +52,7 @@ int getVertixInDir(int v, char dir, int numCol, int numLin);
 int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts);
 void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int df);
 void printVertices(Vertice verts, int);
+void pis(Table pi, int numV);
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
@@ -67,7 +68,7 @@ int main(int argc, char const* argv[]) {
 
 	numV = numLin * numCol;
 	verts = new vertice[numV + 1];
-	disc = new int[num + 1];
+	disc = new int[numV + 1];
 
     // pesos do primeiro plano -------------
 	// getchar();
@@ -122,12 +123,11 @@ int main(int argc, char const* argv[]) {
 
 /********************************** ALGORITMO *********************************/
 int EdmondzinhoSkarp(Vertice verts, Table disc, int numLin, int numCol) {
-	int v, l, c, flow = 0, numV = numCol * numLin, df;
+	int v, flow = 0, numV = numCol * numLin, df;
 	Table pi = new int[numV + 1];
 
 	while (BFS(verts, pi, numCol, numLin)) {
 		df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
-		pis(pi, numV);
 		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
 			df = min(df, getDiffFromTo(pi[v], v,  numCol, numLin, verts));
 		}
@@ -145,12 +145,12 @@ int EdmondzinhoSkarp(Vertice verts, Table disc, int numLin, int numCol) {
 void outpuThis(Table disc, int flow, int numLin, int numCol) {
 	int l, c;
 
-	printf("%d\n", flow);
+	printf("%d\n\n", flow);
 	for (l = 0; l < numLin; l++) {
-		printf("\n");
 		for (c = 0; c < numCol; c++) {
 			printf("%d ", disc[pos(l, c)]);
 		}
+		printf("\n");
 	}
 }
 
