@@ -119,7 +119,7 @@ int main(int argc, char const* argv[]) {
 	Edmondzinho(verts, numLin, numCol);
 
 	printVertices(verts, numV);
-
+	//////////////////////FREEEEEES
 	return 0;
 }
 
@@ -137,19 +137,28 @@ void printVertices(Vertice verts, int numV) {
 	}
 }
 
+void pis(int* pi, int numV) {
+	int v;
+	for (v = 0; v < numV+1; v++) {
+		printf("Pi[%d]: %d\n", v, pi[v]);
+	}
+}
+
 
 int Edmondzinho(Vertice verts, int numLin, int numCol) {
 	int v, flow = 0, numV = numCol * numLin, pi[numV + 1], df;
 
 	while (bfs(verts, pi, numCol, numLin)) {
-		df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
+		//pis(pi, numV);
+		break;
+		/*df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
 		for (v = pi[TARGET_ID]; v != -1; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
 			df = min(df, getDiffFromTo(pi[v], v,  numCol, numLin, verts));
 		}
 		for (v = pi[TARGET_ID]; v != -1; v = pi[v]) {
 			setDiffFromTo(pi[v], v,  numCol, numLin, verts, df);
 		}
-		flow += df;
+		flow += df;*/
 	}
 	return flow;
 }
@@ -229,16 +238,16 @@ char relatedPos(int from, int to, int numCol, int numLin) {
 int getVOfDir(int v, char dir, int numCol, int numLin) {
 	switch (dir) {
 		case EAST:
-			return (v + 1) % numCol ? -1 : v + 1;
+			return (v + 1) % numCol ? v + 1 : INVALID;
 			break;
 		case WEST:
-			return v % numCol ? -1 : v - 1;
+			return v % numCol ? v - 1 : INVALID;
 			break;
 		case SOUTH:
-			return numCol * (numLin - 1) <= v ? -1 : v + numCol;
+			return numCol * (numLin - 1) <= v ? INVALID : v + numCol;
 			break;
 		case NORTH:
-			return v < numCol ? -1 : v - numCol;
+			return v < numCol ? INVALID : v - numCol;
 			break;
 		case TARGET:
 			return TARGET_ID;
@@ -254,7 +263,7 @@ int bfs(Vertice verts, int* pi, int numCol, int numLin) {
 	queue<int> queueV;
 	int v, d, nextV, numV = numCol * numLin;
 	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
-
+	pi[numV] = -1;
 	for(v = 0; v<numV; v++) {
 		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
 			queueV.push(v);
@@ -263,17 +272,21 @@ int bfs(Vertice verts, int* pi, int numCol, int numLin) {
 			pi[v] = INVALID;
 		}
 	}
-
+	pis(pi, numV);
 	while (queueV.size()) {
+
 		v = queueV.front();
 		queueV.pop();
 		for(d = 0; d<5; d++) {
 			nextV = getVOfDir(v, dirs[d], numCol, numLin);
+			printf("from %d to %d\n", v, nextV);
 			if (nextV != INVALID && pi[nextV] == INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
+				printf("andou\n");
 				queueV.push(nextV);
 				pi[nextV] = v;
 			}
 		}
+		pis(pi, numV);
 	}
 	return pi[TARGET_ID] != INVALID;
 }
