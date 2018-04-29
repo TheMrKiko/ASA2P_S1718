@@ -14,6 +14,7 @@
 using namespace std;
 
 #define min(A, B) A < B ? A : B
+#define cp(A) A ? 'C' : 'P'
 #define FLOW 0
 #define CAPACITY 1
 #define SOURCE 'f'
@@ -148,7 +149,7 @@ void outpuThis(Table disc, int flow, int numLin, int numCol) {
 	printf("%d\n\n", flow);
 	for (l = 0; l < numLin; l++) {
 		for (c = 0; c < numCol; c++) {
-			printf("%d ", disc[pos(l, c)]);
+			printf("%c ", cp(disc[pos(l, c)]));
 		}
 		printf("\n");
 	}
