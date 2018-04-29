@@ -37,58 +37,51 @@ typedef struct vertice {
 	int west[2];
 	int fsource[2];
 	int target[2];
-} * Vertice;
+}* Vertice;
+
+typedef int* Table;
 
 /********************************* PROTOTIPOS *********************************/
-void printVertices(Vertice verts, int);
-void Edmondzinho(Vertice verts, int numLin, int numCol);
+int EdmondzinhoSkarp(Vertice verts, Table d, int numLin, int numCol);
+int pushFlow(Vertice verts, int numV);
+int BFS(Vertice verts, Table pi, int numCol, int numLin);
+void DFS(Vertice verts, Table disc, int numCol, int numLin);
+char relatedPos(int from, int to, int numCol, int numLin);
+void outpuThis(Table disc, int flow, int numLin, int numCol);
+int getVertixInDir(int v, char dir, int numCol, int numLin);
 int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts);
 void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int df);
-char relatedPos(int from, int to, int numCol, int numLin);
-int getVOfDir(int v, char dir, int numCol, int numLin);
-int bfs(Vertice verts, int* pi, int numCol, int numLin);
-int pushFlow(Vertice verts, int numV);
-void dfs(Vertice verts, int* discovered, int numCol, int numLin);
+void printVertices(Vertice verts, int);
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
-    int numLin, numCol, numV, aux, l, c, v;
+    int numLin, numCol, numV, aux, flow, l, c, v;
+	Table disc;
 	Vertice verts;
 
     // LER INPUT ---------------------------------------------------------------
     // tamanhos iniciais das tabelas -------------
-    if (!scanf("%d %d", &numLin, &numCol) || numLin <= 0 || numCol <= 0 ) {
+    if (!scanf("%d %d", &numLin, &numCol) || numLin <= 0 || numCol <= 0) {
 		printf("Deu erro a ler\n");
 	}
 
 	numV = numLin * numCol;
 	verts = new vertice[numV + 1];
+	disc = new int[num + 1];
 
     // pesos do primeiro plano -------------
 	// getchar();
-
 	for (v = 0; v < numV; v++) {
 		scanf("%d", &verts[v].fsource[CAPACITY]);
 		verts[v].fsource[FLOW] = 0;
 	}
 
-    /*printf("plano:\n");
-    for (v = 0; v < numV; v++) {
-        printf("%d/%d-", verts[v].fsource[FLOW], verts[v].fsource[CAPACITY]);
-    }
-    printf("\n------\n");*/
-
 	// pesos do cenario -------------
 	// getchar();
-
 	for (v = 0; v < numV; v++) {
 		scanf("%d", &verts[v].target[CAPACITY]);
 		verts[v].target[FLOW] = 0;
 	}
-    /*for (v = 0; v < numV; v++) {
-        printf("%d-%d", verts[v].target[FLOW], verts[v].target[CAPACITY]);
-    }
-    printf("\n------\n");*/
 
     // pesos das vizinhancas horizontais -------------
     // getchar();
@@ -115,19 +108,124 @@ int main(int argc, char const* argv[]) {
 	}
 
 	// PUSHEI PUSHANDO da source para a target toda ----------------------------
+	flow = pushFlow(verts, numV);
 
-	//printVertices(verts, numV);
 	// ALGORITMANDO ------------------------------------------------------------
-	Edmondzinho(verts, numLin, numCol);
+	flow += EdmondzinhoSkarp(verts, disc, numLin, numCol);
 
-	//printVertices(verts, numV);
-	//////////////////////FREEEEEES
+	// IMPRIMINDO --------------------------------------------------------------
+	outpuThis(disc, flow, numLin, numCol);
+
+	//FREES
 	return 0;
 }
 
+/********************************** ALGORITMO *********************************/
+int EdmondzinhoSkarp(Vertice verts, Table disc, int numLin, int numCol) {
+	int v, l, c, flow = 0, numV = numCol * numLin, df;
+	Table pi = new int[numV + 1];
+
+	while (BFS(verts, pi, numCol, numLin)) {
+		df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
+		pis(pi, numV);
+		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
+			df = min(df, getDiffFromTo(pi[v], v,  numCol, numLin, verts));
+		}
+		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {
+			setDiffFromTo(pi[v], v,  numCol, numLin, verts, df);
+		}
+		flow += df;
+	}
+
+	DFS(verts, disc, numCol, numLin);
+
+	return flow;
+}
+
+void outpuThis(Table disc, int flow, int numLin, int numCol) {
+	int l, c;
+
+	printf("%d\n", flow);
+	for (l = 0; l < numLin; l++) {
+		printf("\n");
+		for (c = 0; c < numCol; c++) {
+			printf("%d ", disc[pos(l, c)]);
+		}
+	}
+}
+
+/********************************** BFS E DFS *********************************/
+int BFS(Vertice verts, Table pi, int numCol, int numLin) {
+	queue<int> queueV;
+	int v, d, nextV, numV = numCol * numLin;
+	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
+
+	pi[numV] = INVALID;
+	for (v = 0; v < numV; v++) {
+		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
+			queueV.push(v);
+			pi[v] = SOURCE_ID;
+		} else {
+			pi[v] = INVALID;
+		}
+	}
+	while (queueV.size()) {
+		v = queueV.front();
+		queueV.pop();
+		for(d = 0; d < 5; d++) {
+			nextV = getVertixInDir(v, dirs[d], numCol, numLin);
+			if (nextV != INVALID && pi[nextV] == INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
+				queueV.push(nextV);
+				pi[nextV] = v;
+			}
+		}
+	}
+	return pi[TARGET_ID] != INVALID;
+}
+
+void DFS(Vertice verts, Table disc, int numCol, int numLin) {
+	stack<int> stackV;
+	int v, d, numV = numCol * numLin, nextV;
+	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
+
+	for (v = 0; v < numV; v++) {
+		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
+			stackV.push(v);
+			disc[v] = BACKGROUND;
+		} else {
+			disc[v] = FOREGROUND;
+		}
+	}
+	while (stackV.size()) {
+		v = stackV.top();
+		stackV.pop();
+		if (disc[v] == FOREGROUND) {
+			disc[v] = BACKGROUND;
+			for (d = 0; d < 5; d++) {
+				nextV = getVertixInDir(v, dirs[d], numCol, numLin);
+				if (nextV != INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
+					stackV.push(nextV);
+				}
+			}
+		}
+	}
+}
+
 /******************************* OUTRAS FUNCOES *******************************/
+int pushFlow(Vertice verts, int numV) {
+	int min, v, flow = 0;
+	
+	for (v = 0; v < numV; v++) {
+		min = min(verts[v].fsource[CAPACITY], verts[v].target[CAPACITY]);
+		verts[v].fsource[FLOW] = verts[v].target[FLOW] = min;
+		flow += min;
+	}
+	return flow;
+}
+
 void printVertices(Vertice verts, int numV) {
 	int v;
+
 	for (v = 0; v < numV; v++) {
 		printf("V: %d - %d/%d | n%d/%d s%d/%d e%d/%d w%d/%d | %d/%d\n", v,
 		verts[v].fsource[FLOW], verts[v].fsource[CAPACITY],
@@ -139,40 +237,52 @@ void printVertices(Vertice verts, int numV) {
 	}
 }
 
-void pis(int* pi, int numV) {
+void pis(Table pi, int numV) {
 	int v;
-	for (v = 0; v < numV+1; v++) {
+
+	for (v = 0; v < numV + 1; v++) {
 		printf("Pi[%d]: %d\n", v, pi[v]);
 	}
 }
 
-
-void Edmondzinho(Vertice verts, int numLin, int numCol) {
-	int v, l, c, flow, numV = numCol * numLin, pi[numV + 1], df, di[numV + 1];
-	flow = pushFlow(verts, numV);
-
-	while (bfs(verts, pi, numCol, numLin)) {
-		df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
-		pis(pi, numV);
-		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
-			df = min(df, getDiffFromTo(pi[v], v,  numCol, numLin, verts));
-		}
-		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {
-			setDiffFromTo(pi[v], v,  numCol, numLin, verts, df);
-		}
-		printf("%d\n", v);
-		flow += df;
-	}
-	dfs(verts, di, numCol, numLin);
-	printf("%d\n", flow);
-	for (l = 0; l < numLin; l++) {
-		for (c = 0; c < numCol; c++) {
-			printf("%d ", di[pos(l, c)]);
-		}
-		printf("\n");
+char relatedPos(int from, int to, int numCol, int numLin) {
+	if (from == SOURCE_ID) {
+		return SOURCE;
+	} else if (to == TARGET_ID) {
+		return TARGET;
+	} else if (to - 1 == from) {
+		return EAST;
+	} else if (to + 1 == from) {
+		return WEST;
+	} else if ( (to - from) > 0 && (to - from) % numCol == 0 ) {
+		return SOUTH;
+	} else {
+		return NORTH;
 	}
 }
 
+int getVertixInDir(int v, char dir, int numCol, int numLin) {
+	switch (dir) {
+		case EAST:
+			return (v + 1) % numCol ? v + 1 : INVALID;
+			break;
+		case WEST:
+			return v % numCol ? v - 1 : INVALID;
+			break;
+		case SOUTH:
+			return numCol * (numLin - 1) <= v ? INVALID : v + numCol;
+			break;
+		case NORTH:
+			return v < numCol ? INVALID : v - numCol;
+			break;
+		case TARGET:
+			return TARGET_ID;
+			break;
+		default:
+			return INVALID;
+			break;
+	}
+}
 
 int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts) {
 	switch (relatedPos(from, to, numCol, numLin)) {
@@ -227,117 +337,4 @@ void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int 
 		default:
 			break;
 	}
-}
-
-char relatedPos(int from, int to, int numCol, int numLin) {
-	if (from == SOURCE_ID) {
-		return SOURCE;
-	} else if (to == TARGET_ID) {
-		return TARGET;
-	} else if (to - 1 == from) {
-		return EAST;
-	} else if (to + 1 == from) {
-		return WEST;
-	} else if ( (to - from) > 0 && (to - from) % numCol == 0 ) {
-		return SOUTH;
-	} else {
-		return NORTH;
-	}
-}
-
-int getVOfDir(int v, char dir, int numCol, int numLin) {
-	switch (dir) {
-		case EAST:
-			return (v + 1) % numCol ? v + 1 : INVALID;
-			break;
-		case WEST:
-			return v % numCol ? v - 1 : INVALID;
-			break;
-		case SOUTH:
-			return numCol * (numLin - 1) <= v ? INVALID : v + numCol;
-			break;
-		case NORTH:
-			return v < numCol ? INVALID : v - numCol;
-			break;
-		case TARGET:
-			return TARGET_ID;
-			break;
-		default:
-			return INVALID;
-			break;
-	}
-}
-
-
-int bfs(Vertice verts, int* pi, int numCol, int numLin) {
-	queue<int> queueV;
-	int v, d, nextV, numV = numCol * numLin;
-	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
-	pi[numV] = -1;
-	for(v = 0; v<numV; v++) {
-		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
-			queueV.push(v);
-			pi[v] = SOURCE_ID;
-		} else {
-			pi[v] = INVALID;
-		}
-	}
-	//pis(pi, numV);
-	while (queueV.size()) {
-
-		v = queueV.front();
-		queueV.pop();
-		for(d = 0; d<5; d++) {
-			nextV = getVOfDir(v, dirs[d], numCol, numLin);
-			//printf("from %d to %d\n", v, nextV);
-			if (nextV != INVALID && pi[nextV] == INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
-				//printf("andou\n");
-				queueV.push(nextV);
-				pi[nextV] = v;
-			}
-		}
-		//pis(pi, numV);
-	}
-	return pi[TARGET_ID] != INVALID;
-}
-
-int pushFlow(Vertice verts, int numV) {
-	int min, v, flow = 0;
-	for (v = 0; v < numV; v++) {
-		min = min(verts[v].fsource[CAPACITY], verts[v].target[CAPACITY]);
-		verts[v].fsource[FLOW] = verts[v].target[FLOW] = min;
-		flow += min;
-	}
-	return flow;
-}
-
-
-void dfs(Vertice verts, int* discovered, int numCol, int numLin) {
-	stack<int> stackV;
-	int v, d, numV = numCol * numLin, nextV;
-	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
-	for(v = 0; v<numV; v++) {
-		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
-			stackV.push(v);
-			discovered[v] = BACKGROUND;
-		} else {
-			discovered[v] = FOREGROUND;
-		}
-	}
-	while (stackV.size()) {
-		v = stackV.top();
-		stackV.pop();
-		if (!discovered[v]) {
-			discovered[v] = BACKGROUND;
-			for (d = 0; d<5; d++) {
-				nextV = getVOfDir(v, dirs[d], numCol, numLin);
-				printf("%d\n",nextV );
-				if (nextV != INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
-					stackV.push(nextV);
-				}
-			}
-		}
-	}
-
-
 }
