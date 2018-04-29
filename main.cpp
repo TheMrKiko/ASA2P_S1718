@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <queue>
+#include <stack>
 using namespace std;
 
 #define min(A, B) A < B ? A : B
@@ -24,6 +25,8 @@ using namespace std;
 #define INVALID -1
 #define SOURCE_ID -2
 #define TARGET_ID numCol * numLin
+#define FOREGROUND 0
+#define BACKGROUND 1
 #define pos(line, column) line * numCol + column
 
 /********************************* ESTRUTURAS *********************************/
@@ -38,17 +41,18 @@ typedef struct vertice {
 
 /********************************* PROTOTIPOS *********************************/
 void printVertices(Vertice verts, int);
-int Edmondzinho(Vertice verts, int numLin, int numCol);
+void Edmondzinho(Vertice verts, int numLin, int numCol);
 int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts);
 void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int df);
 char relatedPos(int from, int to, int numCol, int numLin);
 int getVOfDir(int v, char dir, int numCol, int numLin);
 int bfs(Vertice verts, int* pi, int numCol, int numLin);
 int pushFlow(Vertice verts, int numV);
+void dfs(Vertice verts, int* discovered, int numCol, int numLin);
 
 /************************************ MAIN ************************************/
 int main(int argc, char const* argv[]) {
-    int numLin, numCol, numV, aux, l, c, v, min;
+    int numLin, numCol, numV, aux, l, c, v;
 	Vertice verts;
 
     // LER INPUT ---------------------------------------------------------------
@@ -112,11 +116,11 @@ int main(int argc, char const* argv[]) {
 
 	// PUSHEI PUSHANDO da source para a target toda ----------------------------
 
-	printVertices(verts, numV);
+	//printVertices(verts, numV);
 	// ALGORITMANDO ------------------------------------------------------------
-	printf("flox %d\n", Edmondzinho(verts, numLin, numCol));
+	Edmondzinho(verts, numLin, numCol);
 
-	printVertices(verts, numV);
+	//printVertices(verts, numV);
 	//////////////////////FREEEEEES
 	return 0;
 }
@@ -143,8 +147,8 @@ void pis(int* pi, int numV) {
 }
 
 
-int Edmondzinho(Vertice verts, int numLin, int numCol) {
-	int v, flow, numV = numCol * numLin, pi[numV + 1], df;
+void Edmondzinho(Vertice verts, int numLin, int numCol) {
+	int v, l, c, flow, numV = numCol * numLin, pi[numV + 1], df, di[numV + 1];
 	flow = pushFlow(verts, numV);
 
 	while (bfs(verts, pi, numCol, numLin)) {
@@ -159,7 +163,14 @@ int Edmondzinho(Vertice verts, int numLin, int numCol) {
 		printf("%d\n", v);
 		flow += df;
 	}
-	return flow;
+	dfs(verts, di, numCol, numLin);
+	printf("%d\n", flow);
+	for (l = 0; l < numLin; l++) {
+		for (c = 0; c < numCol; c++) {
+			printf("%d ", di[pos(l, c)]);
+		}
+		printf("\n");
+	}
 }
 
 
@@ -298,4 +309,35 @@ int pushFlow(Vertice verts, int numV) {
 		flow += min;
 	}
 	return flow;
+}
+
+
+void dfs(Vertice verts, int* discovered, int numCol, int numLin) {
+	stack<int> stackV;
+	int v, d, numV = numCol * numLin, nextV;
+	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
+	for(v = 0; v<numV; v++) {
+		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
+			stackV.push(v);
+			discovered[v] = BACKGROUND;
+		} else {
+			discovered[v] = FOREGROUND;
+		}
+	}
+	while (stackV.size()) {
+		v = stackV.top();
+		stackV.pop();
+		if (!discovered[v]) {
+			discovered[v] = BACKGROUND;
+			for (d = 0; d<5; d++) {
+				nextV = getVOfDir(v, dirs[d], numCol, numLin);
+				printf("%d\n",nextV );
+				if (nextV != INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
+					stackV.push(nextV);
+				}
+			}
+		}
+	}
+
+
 }
