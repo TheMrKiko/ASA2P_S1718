@@ -93,7 +93,7 @@ int main(int argc, char const* argv[]) {
 			verts[pos(l, c)].east[CAPACITY] = aux;
 			verts[pos(l, c)].east[FLOW] = 0;
 			verts[pos(l, c+1)].west[CAPACITY] = aux;
-			verts[pos(l, c+1)].west[FLOW] = 0;
+			verts[pos(l, c+1)].west[FLOW] = aux;
 		}
 	}
 
@@ -105,7 +105,7 @@ int main(int argc, char const* argv[]) {
 			verts[pos(l, c)].south[CAPACITY] = aux;
 			verts[pos(l, c)].south[FLOW] = 0;
 			verts[pos(l+1, c)].north[CAPACITY] = aux;
-			verts[pos(l+1, c)].north[FLOW] = 0;
+			verts[pos(l+1, c)].north[FLOW] = aux;
 		}
 	}
 
@@ -117,7 +117,7 @@ int main(int argc, char const* argv[]) {
 
 	// IMPRIMINDO --------------------------------------------------------------
 	outpuThis(disc, flow, numLin, numCol);
-
+	printVertices(verts, numV);
 	//FREES
 	return 0;
 }
@@ -225,7 +225,7 @@ void printVertices(Vertice verts, int numV) {
 	int v;
 
 	for (v = 0; v < numV; v++) {
-		printf("V: %d - %d/%d | n%d/%d s%d/%d e%d/%d w%d/%d | %d/%d\n", v,
+		printf("V: %d - %d/%d | n%d/%d s%d/%d e%d/%d w%d/%d | %d/%d\n", v+1,
 		verts[v].fsource[FLOW], verts[v].fsource[CAPACITY],
 		verts[v].north[FLOW], verts[v].north[CAPACITY],
 		verts[v].south[FLOW], verts[v].south[CAPACITY],
@@ -315,19 +315,19 @@ void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int 
 			break;
 		case EAST:
 			verts[from].east[FLOW] += df;
-			verts[to].west[FLOW] += df;
+			verts[to].west[FLOW] -= df;
 			break;
 		case WEST:
 			verts[from].west[FLOW] += df;
-			verts[to].east[FLOW] += df;
+			verts[to].east[FLOW] -= df;
 			break;
 		case SOUTH:
 			verts[from].south[FLOW] += df;
-			verts[to].north[FLOW] += df;
+			verts[to].north[FLOW] -= df;
 			break;
 		case NORTH:
 			verts[from].north[FLOW] += df;
-			verts[to].south[FLOW] += df;
+			verts[to].south[FLOW] -= df;
 			break;
 		case TARGET:
 			verts[from].target[FLOW] += df;
