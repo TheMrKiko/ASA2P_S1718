@@ -28,7 +28,7 @@ using namespace std;
 #define TARGET_ID numCol * numLin
 #define FOREGROUND 0
 #define BACKGROUND 1
-#define pos(line, column) line * numCol + column
+#define pos(line, column) ((line) * (numCol)) + (column)
 
 /********************************* ESTRUTURAS *********************************/
 typedef struct vertice {
@@ -93,7 +93,8 @@ int main(int argc, char const* argv[]) {
 			verts[pos(l, c)].east[CAPACITY] = aux;
 			verts[pos(l, c)].east[FLOW] = 0;
 			verts[pos(l, c+1)].west[CAPACITY] = aux;
-			verts[pos(l, c+1)].west[FLOW] = aux;
+			verts[pos(l, c+1)].west[FLOW] = 0;
+			//printf("%d %d: mete o e%d a %d/%d e o w%d a %d/%d\n", l, c, pos(l, c), 0, aux, pos(l, c+1), aux, aux);
 		}
 	}
 
@@ -105,10 +106,12 @@ int main(int argc, char const* argv[]) {
 			verts[pos(l, c)].south[CAPACITY] = aux;
 			verts[pos(l, c)].south[FLOW] = 0;
 			verts[pos(l+1, c)].north[CAPACITY] = aux;
-			verts[pos(l+1, c)].north[FLOW] = aux;
+			verts[pos(l+1, c)].north[FLOW] = 0;
+			//printf("%d %d: mete o s%d a %d/%d e o n%d a %d/%d\n", l, c, pos(l, c), 0, aux, pos(l+1, c), aux, aux);
+
 		}
 	}
-
+	//printVertices(verts, numV);
 	// PUSHEI PUSHANDO da source para a target toda ----------------------------
 	flow = pushFlow(verts, numV);
 
@@ -117,7 +120,7 @@ int main(int argc, char const* argv[]) {
 
 	// IMPRIMINDO --------------------------------------------------------------
 	outpuThis(disc, flow, numLin, numCol);
-	printVertices(verts, numV);
+	//printVertices(verts, numV);
 	//FREES
 	return 0;
 }
@@ -315,19 +318,19 @@ void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int 
 			break;
 		case EAST:
 			verts[from].east[FLOW] += df;
-			verts[to].west[FLOW] -= df;
+			verts[to].west[FLOW] += df;
 			break;
 		case WEST:
 			verts[from].west[FLOW] += df;
-			verts[to].east[FLOW] -= df;
+			verts[to].east[FLOW] += df;
 			break;
 		case SOUTH:
 			verts[from].south[FLOW] += df;
-			verts[to].north[FLOW] -= df;
+			verts[to].north[FLOW] += df;
 			break;
 		case NORTH:
 			verts[from].north[FLOW] += df;
-			verts[to].south[FLOW] -= df;
+			verts[to].south[FLOW] += df;
 			break;
 		case TARGET:
 			verts[from].target[FLOW] += df;
