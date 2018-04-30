@@ -137,7 +137,6 @@ int EdmondzinhoSkarp(Vertice verts, Table disc, int numLin, int numCol) {
 		}
 		flow += df;
 	}
-
 	DFS(verts, disc, numCol, numLin);
 
 	return flow;
@@ -192,8 +191,6 @@ void DFS(Vertice verts, Table disc, int numCol, int numLin) {
 	for (v = 0; v < numV; v++) {
 		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
 			stackV.push(v);
-			disc[v] = BACKGROUND;
-		} else {
 			disc[v] = FOREGROUND;
 		}
 	}
@@ -215,7 +212,7 @@ void DFS(Vertice verts, Table disc, int numCol, int numLin) {
 /******************************* OUTRAS FUNCOES *******************************/
 int pushFlow(Vertice verts, int numV) {
 	int min, v, flow = 0;
-	
+
 	for (v = 0; v < numV; v++) {
 		min = min(verts[v].fsource[CAPACITY], verts[v].target[CAPACITY]);
 		verts[v].fsource[FLOW] = verts[v].target[FLOW] = min;
