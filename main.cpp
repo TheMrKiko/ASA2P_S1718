@@ -32,12 +32,12 @@ using namespace std;
 
 /********************************* ESTRUTURAS *********************************/
 typedef struct vertice {
-	int north[2];
-	int south[2];
-	int east[2];
-	int west[2];
-	int fsource[2];
-	int target[2];
+	int north;
+	int south;
+	int east;
+	int west;
+	int fsource;
+	int target;
 }* Vertice;
 
 typedef int* Table;
@@ -74,15 +74,13 @@ int main(int argc, char const* argv[]) {
     // pesos do primeiro plano -------------
 	// getchar();
 	for (v = 0; v < numV; v++) {
-		scanf("%d", &verts[v].fsource[CAPACITY]);
-		verts[v].fsource[FLOW] = 0;
+		scanf("%d", &verts[v].fsource);
 	}
 
 	// pesos do cenario -------------
 	// getchar();
 	for (v = 0; v < numV; v++) {
-		scanf("%d", &verts[v].target[CAPACITY]);
-		verts[v].target[FLOW] = 0;
+		scanf("%d", &verts[v].target);
 	}
 
     // pesos das vizinhancas horizontais -------------
@@ -90,10 +88,8 @@ int main(int argc, char const* argv[]) {
 	for (l = 0; l < numLin; l++) {
 		for (c = 0; c < numCol - 1; c++) {
 			scanf("%d", &aux);
-			verts[pos(l, c)].east[CAPACITY] = aux;
-			verts[pos(l, c)].east[FLOW] = 0;
-			verts[pos(l, c+1)].west[CAPACITY] = aux;
-			verts[pos(l, c+1)].west[FLOW] = 0;
+			verts[pos(l, c)].east = aux;
+			verts[pos(l, c+1)].west = aux;
 			//printf("%d %d: mete o e%d a %d/%d e o w%d a %d/%d\n", l, c, pos(l, c), 0, aux, pos(l, c+1), aux, aux);
 		}
 	}
@@ -103,10 +99,8 @@ int main(int argc, char const* argv[]) {
 	for (l = 0; l < numLin - 1; l++) {
 		for (c = 0; c < numCol; c++) {
 			scanf("%d", &aux);
-			verts[pos(l, c)].south[CAPACITY] = aux;
-			verts[pos(l, c)].south[FLOW] = 0;
-			verts[pos(l+1, c)].north[CAPACITY] = aux;
-			verts[pos(l+1, c)].north[FLOW] = 0;
+			verts[pos(l, c)].south = aux;
+			verts[pos(l+1, c)].north = aux;
 			//printf("%d %d: mete o s%d a %d/%d e o n%d a %d/%d\n", l, c, pos(l, c), 0, aux, pos(l+1, c), aux, aux);
 
 		}
@@ -131,7 +125,7 @@ int EdmondzinhoSkarp(Vertice verts, Table disc, int numLin, int numCol) {
 	Table pi = new int[numV + 1];
 
 	while (BFS(verts, pi, numCol, numLin)) {
-		df = verts[pi[TARGET_ID]].target[CAPACITY] - verts[pi[TARGET_ID]].target[FLOW];
+		df = verts[pi[TARGET_ID]].target;
 		for (v = TARGET_ID; v != INVALID && v != SOURCE_ID; v = pi[v]) {//PODE-SE POUPAR AQUI IF NEED
 			df = min(df, getDiffFromTo(pi[v], v,  numCol, numLin, verts));
 		}
@@ -192,6 +186,7 @@ void DFS(Vertice verts, Table disc, int numCol, int numLin) {
 	char dirs[5] = {NORTH, SOUTH, EAST, WEST, TARGET};
 
 	for (v = 0; v < numV; v++) {
+		//printf("oi caralho %d %d\n", verts[v].fsource, getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts) );
 		if (getDiffFromTo(SOURCE_ID, v, numCol, numLin, verts)) {
 			stackV.push(v);
 			disc[v] = FOREGROUND;
@@ -202,8 +197,10 @@ void DFS(Vertice verts, Table disc, int numCol, int numLin) {
 		stackV.pop();
 		if (disc[v] == FOREGROUND) {
 			disc[v] = BACKGROUND;
+			//printf("fui descoberto %d\n", v);
 			for (d = 0; d < 5; d++) {
 				nextV = getVertixInDir(v, dirs[d], numCol, numLin);
+				//printf("%d a encontrar %d\n", v, nextV);
 				if (nextV != INVALID && getDiffFromTo(v, nextV, numCol, numLin, verts)) {
 					stackV.push(nextV);
 				}
@@ -217,15 +214,16 @@ int pushFlow(Vertice verts, int numV) {
 	int min, v, flow = 0;
 
 	for (v = 0; v < numV; v++) {
-		min = min(verts[v].fsource[CAPACITY], verts[v].target[CAPACITY]);
-		verts[v].fsource[FLOW] = verts[v].target[FLOW] = min;
+		min = min(verts[v].fsource, verts[v].target);
+		verts[v].fsource -=  min;
+		verts[v].target -= min;
 		flow += min;
 	}
 	return flow;
 }
 
 void printVertices(Vertice verts, int numV) {
-	int v;
+	/*int v;
 
 	for (v = 0; v < numV; v++) {
 		printf("V: %d - %d/%d | n%d/%d s%d/%d e%d/%d w%d/%d | %d/%d\n", v+1,
@@ -235,7 +233,7 @@ void printVertices(Vertice verts, int numV) {
 		verts[v].east[FLOW], verts[v].east[CAPACITY],
 		verts[v].west[FLOW], verts[v].west[CAPACITY],
 		verts[v].target[FLOW], verts[v].target[CAPACITY]);
-	}
+	}*/
 }
 
 void pis(Table pi, int numV) {
@@ -288,22 +286,22 @@ int getVertixInDir(int v, char dir, int numCol, int numLin) {
 int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts) {
 	switch (relatedPos(from, to, numCol, numLin)) {
 		case SOURCE:
-			return verts[to].fsource[CAPACITY] - verts[to].fsource[FLOW];
+			return verts[to].fsource;
 			break;
 		case EAST:
-			return verts[from].east[CAPACITY] - verts[from].east[FLOW];
+			return verts[from].east;
 			break;
 		case WEST:
-			return verts[from].west[CAPACITY] - verts[from].west[FLOW];
+			return verts[from].west;
 			break;
 		case SOUTH:
-			return verts[from].south[CAPACITY] - verts[from].south[FLOW];
+			return verts[from].south;
 			break;
 		case NORTH:
-			return verts[from].north[CAPACITY] - verts[from].north[FLOW];
+			return verts[from].north;
 			break;
 		case TARGET:
-			return verts[from].target[CAPACITY] - verts[from].target[FLOW];
+			return verts[from].target;
 			break;
 		default:
 			return INVALID;
@@ -314,26 +312,26 @@ int getDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts) {
 void setDiffFromTo(int from, int to, int numCol, int numLin, Vertice verts, int df) {
 	switch (relatedPos(from, to, numCol, numLin)) {
 		case SOURCE:
-			verts[to].fsource[FLOW] += df;
+			verts[to].fsource -= df;
 			break;
 		case EAST:
-			verts[from].east[FLOW] += df;
-			verts[to].west[FLOW] += df;
+			verts[from].east -= df;
+			verts[to].west += df;
 			break;
 		case WEST:
-			verts[from].west[FLOW] += df;
-			verts[to].east[FLOW] += df;
+			verts[from].west -= df;
+			verts[to].east += df;
 			break;
 		case SOUTH:
-			verts[from].south[FLOW] += df;
-			verts[to].north[FLOW] += df;
+			verts[from].south -= df;
+			verts[to].north += df;
 			break;
 		case NORTH:
-			verts[from].north[FLOW] += df;
-			verts[to].south[FLOW] += df;
+			verts[from].north -= df;
+			verts[to].south += df;
 			break;
 		case TARGET:
-			verts[from].target[FLOW] += df;
+			verts[from].target -= df;
 			break;
 		default:
 			break;
