@@ -48,7 +48,7 @@ Como apenas armazenamos a capacidade da aresta, para sabermos a que vértice a a
 dada uma direção. Estas funções serão chamadas quando for necessário percorrer os vértices adjacentes de um vértice.
 
 \subsection{Algoritmo}
-Ao ler o input, é criado o grafo de $NxM$ vértices e de seguida a rede residual de cada aresta e das suas inversas é atualizada.
+Ao ler o input, é criado o grafo de $N*M$ vértices e de seguida a rede residual de cada aresta e das suas inversas é atualizada.
 
 Para otimizar o tempo de execução, antes de aplicar o \textbf{Edmonds-Karp}, atualizamos para cada vértice a rede residual entre a
 \textit{source-vértice-sink} para o mínimo dos flows que é possível passar nas ligações \textit{s-vértice} e \textit{vértice-sink}.
@@ -82,19 +82,18 @@ Assim, podemos concluir que a complexidade final do algoritmo é $O(V{E}^2)$.
 Para esta análise utilizámos o gerador de inputs disponibilizados pelos docentes.
 Apoiados pelo gráfico \ref{g1}, podemos verificar que a execução do algoritmo é polinomial de grau 2, em relação ao número de vértices.
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\textwidth]{graph}
+	\caption{Variação do número de vértices ${V}^2$ em função do tempo de execução do programa}
+	\label{g1}
+\end{figure}
 
 A diferença em relação à análise teórica pode-se explicar pelo facto de que, para os inputs gerados, a procura de caminhos mais curtos
 na \textbf{BFS} do \textbf{Edmonds-Karp} não precisa de percorrer muitas arestas, se as ligações que saiem da source ficam saturadas rapidamente.
 Esta saturação também é acelerada pelo processo de saturação das ligações \textit{s-vértice} e \textit{vértice-sink} explicado acima, antes da execução do \textbf{Edmonds-Karp}.
 
 O pequeno desvio do gráfico é explicado pelos processos a correr em paralelo no computador, que interferem na execução.
-
-\begin{figure}[h]
-			\centering
-			\includegraphics[width=0.5\textwidth]{graph}
-			\caption{Variação do número de vértices {V}² em função do tempo de execução do programa}
-			\label{g1}
-\end{figure}
 
 \section{Referências}
 \begin{itemize}
