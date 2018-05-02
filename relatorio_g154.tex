@@ -20,7 +20,7 @@ Cada vértice tem um peso de primeiro plano \textit{lp}, cenário \textit{cp} e 
 vizinhança \textit{fv}. Todos estes pesos contribuem para a soma de peso total. Cada vértice tem 4 vizinhos, o de cima, o de baixo, o
 da esquerda e o da direita. O peso total de uma segmentação é calculada com a seguinte fórmula:
 
-$$ $$
+$$\sum_{p \in L} \textit{lp} + \sum_{p \in C} \textit{cp} + \sum_{v \in V} \textit{fv} $$
 
 Para modelar este problema recorremos à teoria de grafos para representar \textbf{fluxos}. É criado um grafo dirigido e pesado, em que cada
 vértice corresponde a um pixel, cada arco entre dois vértices tem uma capacidade e pode receber um fluxo. Ao conjunto de vértices
@@ -76,16 +76,23 @@ vértices u e v podem ficar saturados O(V) vezes.
 Na separação dos pixeis em dois grupos de vértices na deteção do \textit{min-cut} a \textbf{DFS} demora $O(V+E)$, no entanto é majorada
 pelo \textbf{Edmonds-Karp}.
 
-Sendo $E=6V$, podemos concluir que a complexidade final do algoritmo é $O({V}^3)$.
+Assim, podemos concluir que a complexidade final do algoritmo é $O(V{E}^2)$.
 
 \subsection{Experimental}
-Apoiados pelo gráfico \ref{g1}, podemos verificar que a execução do algoritmo é polinomial, de grau 3.
+Para esta análise utilizámos o gerador de inputs disponibilizados pelos docentes.
+Apoiados pelo gráfico \ref{g1}, podemos verificar que a execução do algoritmo é polinomial de grau 2, em relação ao número de vértices.
+
+
+A diferença em relação à análise teórica pode-se explicar pelo facto de que, para os inputs gerados, a procura de caminhos mais curtos
+na \textbf{BFS} do \textbf{Edmonds-Karp} não precisa de percorrer muitas arestas, se as ligações que saiem da source ficam saturadas rapidamente.
+Esta saturação também é acelerada pelo processo de saturação das ligações \textit{s-vértice} e \textit{vértice-sink} explicado acima, antes da execução do \textbf{Edmonds-Karp}.
+
 O pequeno desvio do gráfico é explicado pelos processos a correr em paralelo no computador, que interferem na execução.
 
 \begin{figure}[h]
 			\centering
-%			\includegraphics[width=0.5\textwidth]{ss_t(V+E)}
-			\caption{Variação do tempo em função do V+E}
+			\includegraphics[width=0.5\textwidth]{graph}
+			\caption{Variação do número de vértices {V}² em função do tempo de execução do programa}
 			\label{g1}
 \end{figure}
 
